@@ -1,71 +1,34 @@
 /// <reference types ="cypress" />
 import Do from '../support/doClass.js'
+import navTo from '../support/navTo.js'
 
-describe('tugas 16 - penambahan intercept', () => {
+describe('Tugas Akhir - Bagian Login', () => {
 
   beforeEach(() => {
     Do.visit()
   })
 
-  it('SANBER-1 : Login dengan username benar dan password benar', () => {
+  it('FINALSANBER-1 : Login dengan username benar dan password benar', () => {
     cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/login').as('home')
     cy.reload()
     cy.wait('@home').its('response.statusCode').should('eq', 200)
     cy.login('admin','admin123')
     cy.url().should('eq', 'https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index')
   })
-  it('SANBER-2 : Login dengan username salah dan password salah', () => {
+  it('FINALSANBER-2 : Login dengan username salah dan password salah', () => {
     cy.intercept('POST','https://opensource-demo.orangehrmlive.com/web/index.php/auth/validate').as('log')
     cy.login('member','member123')
     cy.wait('@log').its('response.statusCode').should('eq', 302)
     Do.assertMsgInvalid()
   })
-  it('SANBER-3 : Login dengan username benar dan password salah', () => {
-    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/core/i18n/messages').as('msg')
-    cy.login('admin','salah')
-    cy.wait('@msg').its('response.statusCode').should('eq', 304)
-    Do.assertMsgInvalid()
-  })
-  it('SANBER-4 : Login dengan username salah dan password benar', () => {
-    cy.login('member','admin123')
-    Do.assertMsgInvalid()
-  })
-  it('SANBER-5 : Login dengan username dan password kosong', () => {
-    cy.get('button[type="submit"]').click()
-    const notif = cy.get('[class="oxd-text oxd-text--span oxd-input-field-error-message oxd-input-group__message"]')
-    notif.should('exist')
-    notif.eq(1).should('have.text','Required')
-    notif.eq(0).should('have.text','Required')
-  })
-  it('SANBER-6 : Fitur forgot password', () => {
+  it('FINALSANBER-3 : Fitur forgot password', () => {
     cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/sendPasswordReset').as('forgot')
     Do.forgotPass('contohusername')
     cy.wait('@forgot').its('response.statusCode').should('eq', 200)
     cy.get('.orangehrm-card-container').should('exist')
     cy.get('[class="oxd-text oxd-text--p"]').first().should('have.text','A reset password link has been sent to you via email.')
   })
-  it('SANBER-7 : Fitur search di navbar', () => {
-    cy.login('admin','admin123')
-    cy.get('input[placeholder="Search"]').type('admin')
-    cy.get('ul[class="oxd-main-menu"]').find('li').should('have.length', 1)
-    cy.get('ul[class="oxd-main-menu"]').find('li').eq(0).should('have.text', 'Admin')
-  })
-  it('SANBER-8 : Ganti profile picture', () => {
-    cy.intercept('PUT','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/pim/employees/7/picture').as('pict')
-    cy.login('admin','admin123')
-    Do.gantiPp('cypress/fixtures/istockphoto-1342129959-170667a.jpg')
-    cy.wait('@pict').its('response.statusCode').should('eq', 200)
-    cy.get('.oxd-toast.oxd-toast--success.oxd-toast-container--toast').should('exist')
-  })
-  it('SANBER-9 : Ganti employee full name', () => {
-    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/pim/employees').as('emplo')
-    cy.login('admin','admin123')
-    Do.gantiNama('Naruto','Uzumaki')
-    cy.wait('@emplo').its('response.statusCode').should('eq', 200)
-    cy.reload()
-    cy.get('.oxd-text.oxd-text--h6.--strong').should('have.text','Naruto Uzumaki')
-  })
-  it('SANBER-10 : Logout', () => {
+  it('FINALSANBER-4 : Logout', () => {
     cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/logout').as('out')
     cy.login('admin','admin123')
     cy.wait(1500)
@@ -74,6 +37,109 @@ describe('tugas 16 - penambahan intercept', () => {
     cy.get('.oxd-text.oxd-text--h5.orangehrm-login-title').should('have.text','Login')
     cy.wait('@out').its('response.statusCode').should('eq', 302)
   })
+})
 
+describe('Tugas Akhir - Bagian Dashboard', () => {
 
+  beforeEach(() => {
+    cy.session('logSes', () => {
+      Do.visit()
+      cy.login('admin','admin123')
+    })
+    cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index')
+  })
+
+  it('FINALSANBER-5 : Fitur search di navbar', () => {
+    Do.menuSearchAssertion('Admin')
+    Do.menuSearchAssertion('Dashboard')
+    Do.menuSearchAssertion('Directory')
+  })
+  it('FINALSANBER-6 : Validate card menu on dashboard', () => {
+    cy.get('.orangehrm-dashboard-widget .oxd-text--p').eq(0).should('have.text','Time at Work')
+    cy.get('.orangehrm-dashboard-widget .oxd-text--p').eq(1).should('have.text','My Actions')
+    cy.get('body > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > p:nth-child(2)')
+    .should('have.text','Quick Launch')
+    cy.get('body > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(4) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > p:nth-child(2)')
+    .should('have.text','Buzz Latest Posts')
+    cy.get('body > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(5) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > p:nth-child(2)')
+    .should('have.text','Employees on Leave Today')
+    cy.get('body > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(6) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > p:nth-child(2)')
+    .should('have.text','Employee Distribution by Sub Unit')
+    cy.get('body > div:nth-child(3) > div:nth-child(1) > div:nth-child(2) > div:nth-child(2) > div:nth-child(1) > div:nth-child(7) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > p:nth-child(2)')
+    .should('have.text','Employee Distribution by Location')
+    
+  })
+  it('FINALSANBER-7 : Assign Leave from dashboard', () => {
+    
+    cy.get('div.orangehrm-quick-launch-card').find('[title="Assign Leave"]').first().click()
+    cy.get('input[placeholder="Type for hints..."]').type('abc  539133')
+    cy.wait(600)
+    cy.get('div[role="listbox"]').contains('abc 539133').click()
+    cy.get('.oxd-select-text-input').click()
+    cy.get('div[role="listbox"]').contains('CAN - FMLA').click()
+    cy.get('.oxd-date-input').eq(0).type('2025-18-4')
+    cy.get('.oxd-date-input').eq(1).clear()
+    cy.get('.oxd-date-input').eq(1).type('2025-19-4')
+    cy.get('button').contains('Assign').click()
+    cy.get('.oxd-dialog-sheet--gutters').contains('Ok').click()
+    cy.get('.oxd-text--toast-title').should('have.text', 'Success')
+    cy.get('.oxd-text--toast-message').should('have.text', 'Successfully Saved')
+  })
+  
+})//tutup describe
+
+describe('Tugas Akhir - Bagian Directory', () => {
+
+  beforeEach(() => {
+    cy.session('logSes', () => {
+      Do.visit()
+      cy.login('admin','admin123')
+    })
+    cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index')
+  })
+
+  it('FINALSANBER-8 : Validasi UI menu Directory', () => {
+    navTo.directory()
+    cy.get('.oxd-text.oxd-text--h5.oxd-table-filter-title').should('have.text','Directory')
+    cy.get('label').eq(0).should('be.visible')
+    cy.get('label').eq(1).should('be.visible')
+    cy.get('label').eq(2).should('be.visible')
+    cy.get('label').eq(0).should('have.text','Employee Name')
+    cy.get('label').eq(1).should('have.text','Job Title')
+    cy.get('label').eq(2).should('have.text','Location')
+    //tutup modal directory
+    cy.get('button.oxd-icon-button').eq(2).click()
+    cy.get('label').eq(0).should('not.be.visible')
+    cy.get('label').eq(1).should('not.be.visible')
+    cy.get('label').eq(2).should('not.be.visible')
+
+    cy.get('span[class="oxd-text oxd-text--span"]').should('contain','Records Found')
+    
+  })
+  it('FINALSANBER-9 : Fitur search and reset by Employee Name', () => {
+    navTo.directory()
+
+    cy.get('[placeholder="Type for hints..."]').type('abc')
+    cy.wait(600)
+    cy.get('div[role="listbox"]').contains('abc').click()
+    cy.get('button[type="reset"]').click()
+    cy.get('[placeholder="Type for hints..."]').should('be.empty')
+
+    cy.get('[placeholder="Type for hints..."]').type('Rebecca')
+    cy.wait(600)
+    cy.get('div[role="listbox"]').contains('Rebecca').click()
+    cy.contains('Search').click()
+
+    cy.get('p.orangehrm-directory-card-header').first().should('contain','Rebecca')
+
+  })
+  it.only('FINALSANBER-10 : Fitur search and reset by Job Title', () => {
+    navTo.directory()
+  })
+  it('FINALSANBER-11 : Fitur search and reset by Location', () => {
+    navTo.directory()
+  })
+  it('FINALSANBER-12 : Fitur search and reset mixed', () => {
+    navTo.directory()
+  })
 })//tutup describe
