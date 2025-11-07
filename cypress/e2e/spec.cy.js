@@ -7,31 +7,31 @@ import leave from '../support/leave.js'
 describe('Tugas Akhir - Bagian Login', () => {
 
   beforeEach(() => {
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/sendPasswordReset').as('forgot')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/login').as('home')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/logout').as('out')
+    cy.intercept('POST','https://opensource-demo.orangehrmlive.com/web/index.php/auth/validate').as('log')
     Do.loginPage()
   })
 
   it('FINALSANBER-1 : Login dengan username benar dan password benar', () => {
-    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/login').as('home')
     cy.reload()
     cy.wait('@home').its('response.statusCode').should('eq', 200)
     cy.login('admin','admin123')
     cy.url().should('eq', 'https://opensource-demo.orangehrmlive.com/web/index.php/dashboard/index')
   })
   it('FINALSANBER-2 : Login dengan username salah dan password salah', () => {
-    cy.intercept('POST','https://opensource-demo.orangehrmlive.com/web/index.php/auth/validate').as('log')
     cy.login('member','member123')
     cy.wait('@log').its('response.statusCode').should('eq', 302)
     Do.assertMsgInvalid()
   })
   it('FINALSANBER-3 : Fitur forgot password', () => {
-    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/sendPasswordReset').as('forgot')
     Do.forgotPass('contohusername')
     cy.wait('@forgot').its('response.statusCode').should('eq', 200)
     cy.get('.orangehrm-card-container').should('exist')
     cy.get('[class="oxd-text oxd-text--p"]').first().should('have.text','A reset password link has been sent to you via email.')
   })
   it('FINALSANBER-4 : Logout', () => {
-    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/auth/logout').as('out')
     cy.login('admin','admin123')
     cy.wait(1500)
     Do.logOut()
@@ -91,6 +91,13 @@ describe('Tugas Akhir - Bagian Dashboard', () => {
 describe('Tugas Akhir - Bagian Directory', () => {
 
   beforeEach(() => {
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?nameOrId=rebecc').as('employeeName')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?limit=14&offset=0').as('reset')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?limit=14&offset=0&locationId=5').as('searchLoc')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?limit=14&offset=0&jobTitleId=9').as('searchJob')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?limit=14&offset=0&locationId=5&jobTitleId=9').as('jobAndLoc')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?limit=14&offset=0&empNumber=11&jobTitleId=9').as('employAndJob')
+    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?limit=14&offset=0&locationId=5&empNumber=11').as('employAndLoc')
     cy.session('logSes', () => {
       Do.loginPage()
       cy.login('admin','admin123')
@@ -115,7 +122,6 @@ describe('Tugas Akhir - Bagian Directory', () => {
   })
   it('FINALSANBER-9 : Fitur search and reset by Employee Name', () => {
     navTo.directory()
-    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?nameOrId=rebecc').as('employeeName')
     directory.employeeName('rebecc')
     cy.wait('@employeeName').its('response.statusCode').should('eq',200)
     directory.reset()
@@ -126,7 +132,6 @@ describe('Tugas Akhir - Bagian Directory', () => {
   })
   it('FINALSANBER-10 : Fitur search and reset by Job Title', () => {
     navTo.directory()
-    cy.intercept('GET','https://opensource-demo.orangehrmlive.com/web/index.php/api/v2/directory/employees?limit=14&offset=0').as('reset')
     directory.job('QA Engineer')
     cy.get('div.oxd-select-text-input').first().should('have.text','QA Engineer')
     directory.reset()
@@ -135,6 +140,7 @@ describe('Tugas Akhir - Bagian Directory', () => {
     directory.job('QA Engineer')
     cy.wait(600)
     directory.search()
+    cy.wait('@searchJob').its('response.statusCode').should('eq',200)
     cy.get('p.orangehrm-directory-card-subtitle').should('contain','QA Engineer')
 
   })
@@ -143,10 +149,12 @@ describe('Tugas Akhir - Bagian Directory', () => {
     directory.location('Texas')
     cy.get('div.oxd-select-text-input').eq(1).should('have.text','Texas R&D')
     directory.reset()
+    cy.wait('@reset').its('response.statusCode').should('eq',200)
     cy.get('div.oxd-select-text-input').eq(1).should('have.text','-- Select --')
     directory.location('Texas')
     cy.wait(600)
     directory.search()
+    cy.wait('@searchLoc').its('response.statusCode').should('eq',200)
     cy.get('p.orangehrm-directory-card-description').should('contain','Texas')
   })
   context('FINALSANBER-12 : Fitur search and reset mixed', () => {
@@ -155,6 +163,7 @@ describe('Tugas Akhir - Bagian Directory', () => {
       directory.employeeName('rebecc')
       directory.job('QA Engineer')
       directory.search()
+      cy.wait('@employAndJob').its('response.statusCode').should('eq',200)
       cy.get('p.orangehrm-directory-card-header').should('contain','Rebecca')
     })
     it('FINALSANBER-12-2 : Fitur search and reset employee and location', () => {
@@ -163,6 +172,7 @@ describe('Tugas Akhir - Bagian Directory', () => {
       directory.employeeName('rebecc')
       directory.location('Texas')
       directory.search()
+      cy.wait('@employAndLoc').its('response.statusCode').should('eq',200)
       cy.get('p.orangehrm-directory-card-header').should('contain','Rebecca')
     })
     it('FINALSANBER-12-3 : Fitur search and reset job and location', () => {
@@ -171,12 +181,14 @@ describe('Tugas Akhir - Bagian Directory', () => {
       directory.job('QA Engineer')
       directory.location('Texas')
       directory.search()
+      cy.wait('@jobAndLoc').its('response.statusCode').should('eq',200)
       cy.get('p.orangehrm-directory-card-header').should('contain','Rebecca')
     })
     it('FINALSANBER-12-4 : Fitur search semua kosong', () => {
       navTo.directory()
       directory.reset()
       directory.search()
+      cy.wait('@reset').its('response.statusCode').should('eq',200)
       cy.wait(1000)
       cy.get('span[class="oxd-text oxd-text--span"]').invoke('text').then((actualTextValue) => {
         const match = actualTextValue.match(/\((\d+)\)/)

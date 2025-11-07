@@ -24,12 +24,14 @@ class Do{
         cy.get('ul[class="oxd-main-menu"]').find('li').eq(0).should('have.text', menu)
     }
     today(){
-        const today = new Date();
+        const today = new Date()
         const year = today.getFullYear()
         const month = String(today.getMonth() + 1).padStart(2, '0')
         const day = String(today.getDate()).padStart(2, '0')
         const formattedDate = `${year}-${day}-${month}`
         const leaveDateAPI = `${year}-${month}-${day}`
+        // const formattedDate = '2023-05-05'
+        // const leaveDateAPI = '2023-05-05'
         const date = [formattedDate,leaveDateAPI]
         return date
     }
