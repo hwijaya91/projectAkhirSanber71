@@ -1,7 +1,7 @@
 import navTo from "./navTo"
 
 class Do{
-    visit(){
+    loginPage(){
         cy.visit('https://opensource-demo.orangehrmlive.com/web/index.php/auth/login')
     }
     assertMsgInvalid(){
@@ -22,6 +22,16 @@ class Do{
         cy.get('input[placeholder="Search"]').type(menu)
         cy.get('ul[class="oxd-main-menu"]').find('li').should('have.length', 1)
         cy.get('ul[class="oxd-main-menu"]').find('li').eq(0).should('have.text', menu)
+    }
+    today(){
+        const today = new Date();
+        const year = today.getFullYear()
+        const month = String(today.getMonth() + 1).padStart(2, '0')
+        const day = String(today.getDate()).padStart(2, '0')
+        const formattedDate = `${year}-${day}-${month}`
+        const leaveDateAPI = `${year}-${month}-${day}`
+        const date = [formattedDate,leaveDateAPI]
+        return date
     }
 }
 
