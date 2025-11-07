@@ -1,4 +1,4 @@
-# 🧪 OrangeHRM Cypress Automation Tests
+# 🧪 SANBERCODE QA ENGINEER BATCH 71 - FINAL PROJECT
 
 This project contains **end-to-end (E2E) test automation** for the [OrangeHRM Demo Application](https://opensource-demo.orangehrmlive.com/) using **Cypress**.  
 The tests cover the **Login**, **Dashboard**, and **Directory** modules.
@@ -16,7 +16,7 @@ The tests cover the **Login**, **Dashboard**, and **Directory** modules.
 ```
 cypress/
 ├── e2e/
-│   └── finalProject.cy.js      # Main test file (this file)
+│   └── spec.cy.js              # Main test file (this file)
 ├── support/
 │   ├── doClass.js              # Custom helper functions (login, logout, etc.)
 │   ├── navTo.js                # Navigation helpers
@@ -36,11 +36,6 @@ npm install
 ### 2. Open Cypress Test Runner
 ```bash
 npx cypress open
-```
-
-### 3. Run Tests Headlessly
-```bash
-npx cypress run
 ```
 
 ---
@@ -93,6 +88,7 @@ npx cypress run
 
 ## 🧰 Utilities & Custom Commands
 
+- `cy.login()` → Log in to the application 
 - `Do.loginPage()` → Navigate to login page  
 - `Do.forgotPass(username)` → Trigger forgot password  
 - `Do.logOut()` → Log out of the application  
@@ -105,7 +101,7 @@ npx cypress run
 
 ## ✅ Assertions & Validations
 
-- Response status codes (`200`, `302`) are validated via `cy.intercept()`  
+- API Response status codes (`200`, `302`) are validated via `cy.intercept()`  
 - UI assertions check visibility, text content, and URL redirects  
 - Toast and dialog confirmations verify successful actions  
 
@@ -113,6 +109,6 @@ npx cypress run
 
 ## 🧾 Notes
 
-- All tests use **Cypress sessions** for optimized login reuse  
 - Each test is independent and can be executed standalone  
-- Uses the **OrangeHRM public demo site**, which resets periodically  
+- Uses the **OrangeHRM public demo site**, which resets periodically
+- Date on assign leave from dashboard can not be same date
