@@ -4,7 +4,10 @@ This project contains **end-to-end (E2E) test automation** for the [OrangeHRM De
 The tests cover the **Login**, **Dashboard**, and **Directory** modules.
 
 
-![Cypress Test Demo](cypress/videos/spec.cy.js.gif)
+<p align="center">
+  <img src="cypress/videos/spec.cy.js.gif" width="800" alt="Cypress Test Demo">
+</p>
+
 
 ---
 
